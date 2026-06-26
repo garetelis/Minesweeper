@@ -12,7 +12,6 @@ public class Minesweeper {
     public static final String seven = "\u001B[30m";
     public static final String eight = "\u001B[38m";
     public static final String bold = "\u001B[1m";
-    //public static final String end = "\u001B[0m";
 
     public static final String[] letters = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
     
@@ -23,6 +22,13 @@ public class Minesweeper {
         System.out.println(three + bold + "HOW TO PLAY:" + e + "\nWhen asked for your input,\ngive your answer in the format\n" + two + "ROW,COLUMN,FLAG" + e + " or if you do not want\nto place a flag, leave it out.\nFor example, \"a,e,f\" would mean that\nyou want to play on row a, column e\nand what you want to play is a flag.\n\"e,u\" would mean you want to play on\nrow e, column u and would like to\nclear that space.\n\nGot it?\n");
         System.out.print("What size minesweeper board do you want (small, medium, or large): " + one);
         String choice = input.nextLine();
+        System.out.print(e);
+        while (!(choice.equals("small") || choice.equals("medium") || choice.equals("large"))) {
+            System.out.println("\nYour choice must be \"small\", \"medium\", or \"large\"");
+            System.out.print("What size minesweeper board do you want (small, medium, or large): " + one);
+            choice = input.nextLine();
+            System.out.print(e);
+        }
         int mines = 0;
         int size = 0;
         switch (choice) {
@@ -105,25 +111,23 @@ public class Minesweeper {
             String[] play = input.nextLine().split(",");
             System.out.print(e);
             boolean isntValid = true;
-            System.out.println();
             while (isntValid) {
                 if (play.length != 2 && play.length != 3) {
                     System.out.println(three + "\nInvalid input!" + e);
                     System.out.print("\nPlease try again: ");
                     play = input.nextLine().split(",");
                 }
-                else if (Arrays.asList(letters).indexOf(play[0]) >= size || Arrays.asList(letters).indexOf(play[0]) == -1 || Arrays.asList(letters).indexOf(play[1]) >= size || Arrays.asList(letters).indexOf(play[1]) == -1) {
+                else if (Arrays.asList(letters).indexOf(play[0]) >= size || Arrays.asList(letters).indexOf(play[1]) >= size) {
                     System.out.println(three + "\nInvalid space to play!" + e);
                     System.out.print("\nPlease try again: ");
                     play = input.nextLine().split(",");
                 }
-                else if (play.length == 3) {
-                    if (!play[2].equals("f")) {
-                        System.out.println(three + "\nInvalid input!" + e);
-                        System.out.print("\nPlease try again: ");
-                        play = input.nextLine().split(",");
-                    }
-                } if (shown[Arrays.asList(letters).indexOf(play[0])][Arrays.asList(letters).indexOf(play[1])].equals(" ")) {
+                else if (Arrays.asList(letters).indexOf(play[0]) == -1 || Arrays.asList(letters).indexOf(play[1]) == -1) {
+                    System.out.println(three + "\nInvalid row or column!" + e);
+                    System.out.print("\nPlease try again: ");
+                    play = input.nextLine().split(",");
+                }
+                else if (shown[Arrays.asList(letters).indexOf(play[0])][Arrays.asList(letters).indexOf(play[1])].equals(" ")) {
                     System.out.println(three + "\nYou can only play on a square tile or a flag!" + e);
                     System.out.print("\nPlease try a different space: ");
                     play = input.nextLine().split(",");
@@ -131,7 +135,8 @@ public class Minesweeper {
                     System.out.println(three + "\nThat space is flagged!" + e);
                     System.out.print("\nChoose a different space or unflag this one before playing it again: ");
                     play = input.nextLine().split(",");
-                } else {
+                }
+                else {
                     isntValid = false;
                 }
             } 
@@ -140,9 +145,11 @@ public class Minesweeper {
             if (play.length == 3) {
                 if (shown[row][col].equals("B")) {
                     shown[row][col] = "F";
+                    System.out.println();
                     printBoard();
                 } else {
                     shown[row][col] = "B";
+                    System.out.println();
                     printBoard();
                 }
             } else {
@@ -154,12 +161,13 @@ public class Minesweeper {
                     fill(row, col);
                     spread();
                     spread();
+                    System.out.println();
                     printBoard();
                 }
             }
         }
         if (numCovered() == mines) {
-            System.out.println(two + "Congratulations, you won!\n" + e);
+            System.out.println(two + "\nCongratulations, you won!\n" + e);
             printHitMine();
         }
         System.out.print("\nType \"done\" to exit: ");
@@ -221,7 +229,7 @@ public class Minesweeper {
         int count = 0;
         for (String[] row : shown) {
             for (String item : row) {
-                if (item.equals("F")) {
+                if (item.equals("F") || item.equals("B")) {
                     count++;
                 }
             }
@@ -246,24 +254,26 @@ public class Minesweeper {
     }
     public static void fill(int x, int y) {
         shown[x][y] = " ";
-        if (x > 0) {
-            if (board[x - 1][y].equals("0") && shown[x - 1][y].equals("F")) {
-                fill(x - 1, y);
+        if (board[x][y].equals("0")) {
+            if (x > 0) {
+                if (board[x - 1][y].equals("0") && shown[x - 1][y].equals("F")) {
+                    fill(x - 1, y);
+                }
             }
-        }
-        if (x < board.length - 1) {
-            if (board[x + 1][y].equals("0") && shown[x + 1][y].equals("F")) {
-                fill(x + 1, y);
+            if (x < board.length - 1) {
+                if (board[x + 1][y].equals("0") && shown[x + 1][y].equals("F")) {
+                    fill(x + 1, y);
+                }
             }
-        }
-        if (y > 0) {
-            if (board[x][y - 1].equals("0") && shown[x][y - 1].equals("F")) {
-                fill(x, y - 1);
+            if (y > 0) {
+                if (board[x][y - 1].equals("0") && shown[x][y - 1].equals("F")) {
+                    fill(x, y - 1);
+                }
             }
-        }
-        if (y < board.length - 1) {
-            if (board[x][y + 1].equals("0") && shown[x][y + 1].equals("F")) {
-                fill(x, y + 1);
+            if (y < board.length - 1) {
+                if (board[x][y + 1].equals("0") && shown[x][y + 1].equals("F")) {
+                    fill(x, y + 1);
+                }
             }
         }
     }
